@@ -1,7 +1,56 @@
-﻿-- Table: business
+﻿-- Table: industry
+--DROP TABLE industry;
+CREATE TABLE industry
+(
+  id integer NOT NULL,
+  alias character varying,
+  CONSTRAINT "industry primary key" PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
 
+-- Table: period sequence
+CREATE SEQUENCE public.time_id_seq
+  INCREMENT 1
+  START 1;
+  
+-- Table: period
+-- DROP TABLE period;
+CREATE TABLE period
+(
+  id serial NOT NULL,
+  simyear integer,
+  simmonth smallint,
+  simweek smallint,
+  simday smallint,
+  CONSTRAINT "time primary key" PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+
+-- Table: owner
+-- DROP TABLE owner;
+CREATE TABLE owner
+(
+  id serial NOT NULL,
+  alias character varying,
+  email character varying,
+  whsespace smallint DEFAULT 1000,
+  population integer DEFAULT 1000,
+  starttimeid integer,
+  CONSTRAINT "owner primary key" PRIMARY KEY (id),
+  CONSTRAINT "owner start time" FOREIGN KEY (starttimeid)
+      REFERENCES period (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+
+-- Table: business
 -- DROP TABLE business;
-
 CREATE TABLE business
 (
   id serial NOT NULL,
@@ -27,9 +76,7 @@ WITH (
 COMMENT ON COLUMN business.produnits IS 'used for factories/farms';
 
 -- Table: demand
-
 -- DROP TABLE demand;
-
 CREATE TABLE demand
 (
   id serial NOT NULL,
@@ -49,27 +96,8 @@ WITH (
   OIDS=FALSE
 );
 
-CREATE INDEX "fki_demand time id"
-  ON demand
-  USING btree
-  (timeid);
--- Table: industry
-
--- DROP TABLE industry;
-
-CREATE TABLE industry
-(
-  id integer NOT NULL,
-  alias character varying,
-  CONSTRAINT "industry primary key" PRIMARY KEY (id)
-)
-WITH (
-  OIDS=FALSE
-);
 -- Table: inventory
-
 -- DROP TABLE inventory;
-
 CREATE TABLE inventory
 (
   id serial NOT NULL,
@@ -88,28 +116,9 @@ CREATE TABLE inventory
 WITH (
   OIDS=FALSE
 );
--- Index: "fki_inventory business id"
-
--- DROP INDEX "fki_inventory business id";
-
-CREATE INDEX "fki_inventory business id"
-  ON inventory
-  USING btree
-  (businessid);
-
--- Index: "fki_inventory time id"
-
--- DROP INDEX "fki_inventory time id";
-
-CREATE INDEX "fki_inventory time id"
-  ON inventory
-  USING btree
-  (timeid);
 
 -- Table: ledger
-
 -- DROP TABLE ledger;
-
 CREATE TABLE ledger
 (
   id serial NOT NULL,
@@ -128,46 +137,9 @@ CREATE TABLE ledger
 WITH (
   OIDS=FALSE
 );
--- Table: owner
 
--- DROP TABLE owner;
-
-CREATE TABLE owner
-(
-  id serial NOT NULL,
-  alias character varying,
-  email character varying,
-  whsespace smallint DEFAULT 1000,
-  population integer DEFAULT 1000,
-  starttimeid integer,
-  CONSTRAINT "owner primary key" PRIMARY KEY (id),
-  CONSTRAINT "owner start time" FOREIGN KEY (starttimeid)
-      REFERENCES period (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-WITH (
-  OIDS=FALSE
-);
--- Table: period
-
--- DROP TABLE period;
-
-CREATE TABLE period
-(
-  id integer NOT NULL DEFAULT nextval('time_id_seq'::regclass),
-  simyear integer,
-  simmonth smallint,
-  simweek smallint,
-  simday smallint,
-  CONSTRAINT "time primary key" PRIMARY KEY (id)
-)
-WITH (
-  OIDS=FALSE
-);
 -- Table: supply
-
 -- DROP TABLE supply;
-
 CREATE TABLE supply
 (
   id serial NOT NULL,
@@ -186,11 +158,3 @@ CREATE TABLE supply
 WITH (
   OIDS=FALSE
 );
--- Index: "fki_supply industry id"
-
--- DROP INDEX "fki_supply industry id";
-
-CREATE INDEX "fki_supply industry id"
-  ON supply
-  USING btree
-  (industryid);
